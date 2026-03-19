@@ -118,7 +118,8 @@
     @mediascreen (max-width : 600px) {
         
     }
-    </style>
+        
+  </style>
 </head>
 <body>
     <header>PAYFLOW</header>
@@ -167,7 +168,6 @@
     </footer>
 
     <script>
-        // JS Requirement: Pull from localStorage to show live count on home page
         window.onload = () => {
             const history = JSON.parse(localStorage.getItem('transactions')) || [];
             document.getElementById('tx-count').innerText = history.length;
