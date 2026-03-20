@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>payments-Payflow</title>
    <style>
-        /* FIX: Corrected variable syntax */
         :root {
             --success : #2ecc71;
             --failed : #e74c3c;
@@ -19,8 +18,8 @@
             margin : 0;
             display : flex;
             flex-direction : column;
-            height: 100vh; /* Lock height to viewport */
-            overflow: hidden; /* Prevent body scroll */
+            height: 100vh;
+            overflow: hidden; 
         }
         svg {
             background-color: violet;
@@ -182,12 +181,20 @@
     <script>
         function showToast(message, type) {
             const toast = document.createElement('div')
+            toast.textContent = message;
+             document.body.appendChild(toast);
+            const bgColor = type === 'success' ? 'var(--success)' : 'var(--failed)';
             toast.style.cssText = `
             position:fixed; top:20px; right:20px; padding: 15px 25px;
             border-radius: 5px; color: white; font-weight: bold; z-index: 1000
-            background: ${type === 'success'? 'var(--success)': 'var(--failed)'};`;
+            background-color: ${bgColor}; animation: fadeInOut 3s forwards;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
-        const paymentForm = document.getElementsByClassName('payment-form');
+        const paymentForm = document.querySelector('.payment-form');
         paymentForm.addEventListener('submit', function(e){
              e.preventDefault();
             const transaction = {
@@ -198,9 +205,33 @@
                 date: document.getElementById('date').value,
                 status: 'scheduled'
             };
+        const scheduledDate = new Date(transaction.date);    
+        const rightNow = new Date();
+        const delay = scheduledDate - rightNow;
+        
+        let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+            history.push(transaction);
+            localStorage.setItem('paymentHistory', JSON.stringify(history));
 
+            showToast(`payment scheduled for ${transaction.date}`, 'success');
+        
+        if (delay <= 0) {
+            processNow(transaction.id);
+        } else {
+            setTimeout(() => processNow(transaction.id), delay);
+        }
+        });
+
+        function processNow(id) {
+            let history = JSON.parse(localStorage.getItem('paymentHistory'));
+            const index = history.findIndex(t => t.id === id);
             
-        })
+            if (index !== -1) {
+                history[index].status = Math.random() > 0.2 ? 'success' : 'failure';
+                localStorage.setItem('paymentHistory', JSON.stringify(history));
+                showToast(`Transaction ${history[index].status}!`, history[index].status.toLowerCase());         
+            }
+        }
     </script>
 </body>
 </html>
