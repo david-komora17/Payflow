@@ -168,11 +168,17 @@
     </footer>
 
     <script>
+        if (!localStorage.getItem('accounts')) {
+            localStorage.setItem('accounts', JSON.stringify({
+                "Njeri": 5000,
+                "Daniel": 4000
+            }))
+        }
         window.onload = () => {
             const history = JSON.parse(localStorage.getItem('transactions')) || [];
             document.getElementById('tx-count').innerText = history.length;
         };
-        
+
     </script>
 </body>
 </html>
