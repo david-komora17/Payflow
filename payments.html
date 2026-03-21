@@ -172,7 +172,11 @@
 
             <div class="form-group">
                 <label for="recipient-name">Recipient Name</label>
-                <input type="text" id="recipient-name" required>
+                <select name="" id="recipient-name" required>
+                    <option value="">Select Recipient</option>
+                    <option value="Njeri">Njeri</option>
+                    <option value="Daniel">Daniel</option>
+                </select>            
             </div>
 
             <div class="form-group">
@@ -221,7 +225,8 @@
                 recipient: document.getElementById('recipient-name').value,
                 amount: document.getElementById('amount').value,
                 date: document.getElementById('date').value,
-                status: 'scheduled'
+                status: 'scheduled',
+                 
             };
         const scheduledDate = new Date(transaction.date);    
         const rightNow = new Date();
@@ -242,12 +247,24 @@
 
         function processNow(id) {
             let history = JSON.parse(localStorage.getItem('paymentHistory'));
+            let accounts = JSON.parse(localStorage.getItem('accounts'));
             const index = history.findIndex(t => t.id === id);
             
             if (index !== -1) {
-                history[index].status = Math.random() > 0.2 ? 'success' : 'failure';
+                const trans = history[index];
+                const isSuccess = Math.random() > 0.5
+                trans.status = isSuccess? 'success' : 'failure';
+                
+                if (isSuccess && accounts) {
+                    const amount = parseFloat(trans.amount);
+                    accounts[trans.sender] -= amount;
+                    accounts[trans.recipient] += amount;
+                    localStorage.setItem('accounts', JSON.stringify(accounts));
+
+                }
                 localStorage.setItem('paymentHistory', JSON.stringify(history));
-                showToast(`Transaction ${history[index].status}!`, history[index].status.toLowerCase());         
+            
+                showToast(`Transaction ${trans.status}!`, trans.status === 'success'? 'success' : 'failure');
             }
         }
     </script>
