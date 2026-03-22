@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>payments-Payflow</title>
+    <link rel="icon" href="/credit-card-regular.png" type="image/x-icon">
    <style>
         :root {
             --success : #2ecc71;
@@ -248,6 +249,7 @@
         function processNow(id) {
             let history = JSON.parse(localStorage.getItem('paymentHistory'));
             let accounts = JSON.parse(localStorage.getItem('accounts'));
+
             const index = history.findIndex(t => t.id === id);
             
             if (index !== -1) {
@@ -264,7 +266,7 @@
                 }
                 localStorage.setItem('paymentHistory', JSON.stringify(history));
             
-                showToast(`Transaction ${trans.status}!`, trans.status === 'success'? 'success' : 'failure');
+                showToast(`Transaction ${trans.status}!`, trans.status === 'success'? 'success' : 'failed');
             }
         }
     </script>
