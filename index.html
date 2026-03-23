@@ -13,7 +13,7 @@
         }
 
         body {
-            background-color: purple;
+            background : rgba(255, 255, 255, 0);
             font-family :'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin : 0;
             display : flex;
@@ -60,7 +60,7 @@
         nav a { padding: 10px 20px; color: white; text-decoration: none; font-size: 14px; }
 
         .content-container {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: purple;
             backdrop-filter: blur(10px);
             padding: 40px;
             border-radius: 15px;
@@ -137,8 +137,13 @@
             }))
         }
         window.onload = () => {
-            const history = JSON.parse(localStorage.getItem('transactions', 'accounts')) || [];
-            document.getElementById('tx-count').innerText = history.length;
+            const history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+
+            const txElement = document.getElementById('tx-count');
+            if (txElement) {
+                txElement.innerText = history.length;
+            }
+
         };
 
     </script>
