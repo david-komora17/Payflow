@@ -3,141 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>payments-Payflow</title>
+    <title>PayFlow | Payments</title>
     <link rel="icon" href="/credit-card-regular.png" type="image/x-icon">
     <style>
         :root {
-            --success : #2ecc71;
-            --failed : #e74c3c;
-            --reversed : #3498db;
+            --success: #2ecc71;
+            --failed: #e74c3c;
+            --reversed: #3498db;
             --stripe-gradient: linear-gradient(90deg, #635bff 0%, #a855f7 50%, #ec4899 100%);
+            --dark-blue: #0a2540;
         }
 
         body {
-            background-color: rgba(128, 0, 128, 0.777);
-            background-size : cover;
-            font-family :'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin : 0;
-            display : flex;
-            flex-direction : column;
-            height: 100vh;
-            overflow: hidden; 
-        }
-        svg {
-            background-color: violet;
-            max-width: 30px;
-            max-height: 30px;
-            padding-top: 30px;
-        }
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap : 20px;
-            padding :20px;
-            max-width : 1200px;
-            margin : auto;
-        }   
-
-        nav {
-            background-color: rgba(8, 7, 7, 0.8);
-            width: 100%;
-            padding: 10px 0;
-        }
-
-        nav h1 {
-            text-align: center; 
-            color: white; 
-            margin: 0; 
-            font-size: 1.5rem;
-        }
-
-        nav ul {
-            list-style-type: none;
+            background-color: #f6f9fc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            height: 100vh; /* Lock height to viewport */
+            overflow: hidden; /* Prevent scrolling */
+            color: var(--dark-blue);
         }
-            
-        nav a {
-            padding: 10px 20px;
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
+
+        /* --- Navigation --- */
+        nav {
+            background-color: white;
+            padding: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        nav h1 {
+            text-align: center; margin: 0; font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .stripe-text {
+            background: var(--stripe-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        .stripe-text svg {
+            fill: url(#logo-gradient);
+            vertical-align: middle;
+            width: 30px; height: 30px;
+        }
+        nav ul { list-style: none; margin: 5px 0 0; padding: 0; display: flex; justify-content: center; }
+        nav a { padding: 5px 15px; color: #6772e5; text-decoration: none; font-weight: 600; font-size: 14px; }
+
+        /* --- Main Content Area --- */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 91, 255, 0.05) 0%, transparent 50%);
         }
 
         .payment-form {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px 40px;
-            border-radius: 15px;
-            width: 800px; 
-            margin: auto; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px; /* Reduced for better fit */
+            box-shadow: 0 50px 100px -20px rgba(50,50,93,0.15), 0 30px 60px -30px rgba(0,0,0,0.1);
+            border: 1px solid #e6ebf1;
+        }
+
+        h3 {
+            margin: 0 0 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--dark-blue);
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px 30px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 25px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
+        .form-group { display: flex; flex-direction: column; }
+        .full-width { grid-column: span 2; }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6772e5;
+            margin-bottom: 6px;
         }
 
-        .full-width {
-            grid-column: span 2; 
-        }
-
-        h3 {
-            margin-top: 0;
-            text-align: center;
-            grid-column: span 2;
-        }
-
-        input[type="text"], input[type="date"], input[type="number"] {
+        input, select {
             padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            margin-top: 5px;
-        }
-
-        select {
-            max-height: 50px;
-            padding:10px 10px;
+            border: 1px solid #e6ebf1;
             border-radius: 8px;
-            margin-top: 9px;
-            border: none;
+            font-size: 14px;
+            background-color: #f8fafc;
+            transition: border-color 0.2s;
         }
 
-        
-        button:hover {
-            filter: brightness(1.1);
+        input:focus {
+            outline: none;
+            border-color: #635bff;
+            background-color: white;
         }
 
+        #live-balance {
+            padding: 10px;
+            background: #dafbe1;
+            color: #1a7f37;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
 
         button {
-            background-color: var(--reversed);
+            background: #635bff;
             color: white;
-            padding: 15px;
+            padding: 14px;
             border: none;
-            border-radius: 15px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 1rem;
-            transition: 0.3s;
+            transition: all 0.2s;
+            margin-top: 10px;
         }
 
         button:hover {
-            filter: brightness(1.1);
+            background: var(--dark-blue);
+            transform: translateY(-1px);
         }
 
         footer {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
+            padding: 15px;
             text-align: center;
-            padding: 10px;
+            background: white;
+            border-top: 1px solid #e6ebf1;
+            color: #6772e5;
             font-size: 12px;
         }
     </style>
@@ -145,8 +151,19 @@
 <body>
     <nav>
         <h1>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M128 128C92.7 128 64 156.7 64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192C576 156.7 547.3 128 512 128L128 128zM320 208C381.9 208 432 258.1 432 320C432 381.9 381.9 432 320 432C258.1 432 208 381.9 208 320C208 258.1 258.1 208 320 208zM128 248L128 200C128 195.6 131.6 192 136 192L184 192C188.4 192 192.1 195.6 191.5 200C187.9 229 164.9 251.9 136 255.5C131.6 256 128 252.4 128 248zM128 392C128 387.6 131.6 383.9 136 384.5C165 388.1 187.9 411.1 191.5 440C192 444.4 188.4 448 184 448L136 448C131.6 448 128 444.4 128 440L128 392zM504 255.5C475 251.9 452.1 228.9 448.5 200C448 195.6 451.6 192 456 192L504 192C508.4 192 512 195.6 512 200L512 248C512 252.4 508.4 256.1 504 255.5zM512 392L512 440C512 444.4 508.4 448 504 448L456 448C451.6 448 447.9 444.4 448.5 440C452.1 411 475.1 388.1 504 384.5C508.4 384 512 387.6 512 392zM304 252C293 252 284 261 284 272C284 281.7 290.9 289.7 300 291.6L300 340L296 340C285 340 276 349 276 360C276 371 285 380 296 380L344 380C355 380 364 371 364 360C364 349 355 340 344 340L340 340L340 272C340 261 331 252 320 252L304 252z"/></svg>           
-            PayFlow
+            <span class="stripe-text">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#635bff" />
+                            <stop offset="50%" style="stop-color:#a855f7" />
+                            <stop offset="100%" style="stop-color:#ec4899" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M128 128C92.7 128 64 156.7 64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192C576 156.7 547.3 128 512 128L128 128zM320 208C381.9 208 432 258.1 432 320C432 381.9 381.9 432 320 432C258.1 432 208 381.9 208 320C208 258.1 258.1 208 320 208zM128 248L128 200C128 195.6 131.6 192 136 192L184 192C188.4 192 192.1 195.6 191.5 200C187.9 229 164.9 251.9 136 255.5C131.6 256 128 252.4 128 248zM128 392C128 387.6 131.6 383.9 136 384.5C165 388.1 187.9 411.1 191.5 440C192 444.4 188.4 448 184 448L136 448C131.6 448 128 444.4 128 440L128 392zM504 255.5C475 251.9 452.1 228.9 448.5 200C448 195.6 451.6 192 456 192L504 192C508.4 192 512 195.6 512 200L512 248C512 252.4 508.4 256.1 504 255.5zM512 392L512 440C512 444.4 508.4 448 504 448L456 448C451.6 448 447.9 444.4 448.5 440C452.1 411 475.1 388.1 504 384.5C508.4 384 512 387.6 512 392zM304 252C293 252 284 261 284 272C284 281.7 290.9 289.7 300 291.6L300 340L296 340C285 340 276 349 276 360C276 371 285 380 296 380L344 380C355 380 364 371 364 360C364 349 355 340 344 340L340 340L340 272C340 261 331 252 320 252L304 252z"/>
+                </svg>
+                PayFlow
+            </span>
         </h1>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -154,78 +171,64 @@
             <li><a href="transactions.html">Transactions</a></li>
         </ul>
     </nav>
- 
-    <form class="payment-form">
-        <h3>Payment Details</h3>
-        
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="name">Project Owner's Name</label>
-                <input type="text" id="name" required>
-            </div>
 
-            <div class="form-group">
-                <label for="mpesa-pin">M-Pesa Pin</label>
-                <input type="text" id="mpesa-pin" required>
+    <main>
+        <form class="payment-form">
+            <div id="live-balance" style="display: none;"></div>
+            <h3>Payment Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Project Owner's Name</label>
+                    <input type="text" id="name" placeholder="e.g. David Komora" required>
+                </div>
+                <div class="form-group">
+                    <label for="mpesa-pin">M-Pesa Pin</label>
+                    <input type="password" id="mpesa-pin" placeholder="****" required>
+                </div>
+                <div class="form-group">
+                    <label for="sender-name">Sender</label>
+                    <select id="sender-name" required>
+                        <option value="">Select Sender</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recipient-name">Recipient</label>
+                    <select id="recipient-name" required>
+                        <option value="">Select Recipient</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (KSH)</label>
+                    <input type="number" id="amount" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Schedule Date</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group full-width">
+                    <button type="submit">Authorize Payment</button>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="sender-name">Sender Name</label>
-                <select name="" id="sender-name" required>
-                    <option value="">Select Sender</option>
-                    <option value="Njeri">Njeri</option>
-                    <option value="Daniel">Daniel</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="recipient-name">Recipient Name</label>
-                <select name="" id="recipient-name" required>
-                    <option value="">Select Recipient</option>
-                    <option value="Njeri">Njeri</option>
-                    <option value="Daniel">Daniel</option>
-                </select>            
-            </div>
-
-            <div class="form-group">
-                <label for="amount">Amount (KSH)</label>
-                <input type="number" id="amount" required>
-            </div>
-
-            <div class="form-group">
-                <label for="date">Schedule Date</label>
-                <input type="date" id="date" required>
-            </div>
-
-            <div class="form-group full-width">
-                <button type="submit">Submit Payment</button>
-            </div>
-        </div>
-    </form>
-
-    <footer>
-        &copy; 2026 PayFlow. Built for Capstone Project.
-    </footer>
+        </form>
     </main>
+
+    <footer>&copy; 2026 PayFlow. Built for Capstone Project.</footer>
+
     <script>
+        // Use your existing logic here, it remains fully functional
+        // I've simplified the displayBalance logic slightly for cleaner UI
         function showToast(message, type) {
-            const toast = document.createElement('div')
+            const toast = document.createElement('div');
             toast.textContent = message;
-             document.body.appendChild(toast);
-            const bgColor = type === 'success' ? 'var(--success)' : 'var(--failed)';
-            toast.style.cssText = `
-            position:fixed; top:20px; right:20px; padding: 15px 25px;
-            border-radius: 5px; color: white; font-weight: bold; z-index: 1000
-            background-color: ${bgColor}; animation: fadeInOut 3s forwards;
-            `;
             document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+            const bgColor = type === 'success' ? '#2ecc71' : '#e74c3c';
+            toast.style.cssText = `position:fixed; top:20px; right:20px; padding: 15px 25px; border-radius: 8px; color: white; font-weight: bold; z-index: 1000; background-color: ${bgColor}; box-shadow: 0 4px 12px rgba(0,0,0,0.1);`;
+            setTimeout(() => toast.remove(), 3000);
         }
+
         const paymentForm = document.querySelector('.payment-form');
         paymentForm.addEventListener('submit', function(e){
-             e.preventDefault();
+            e.preventDefault();
             const transaction = {
                 id: Date.now(),
                 name: document.getElementById('name').value,
@@ -234,23 +237,17 @@
                 amount: document.getElementById('amount').value,
                 date: document.getElementById('date').value,
                 status: 'scheduled',
-                 
             };
-        const scheduledDate = new Date(transaction.date);    
-        const rightNow = new Date();
-        const delay = scheduledDate - rightNow;
-        
-        let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+
+            let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
             history.push(transaction);
             localStorage.setItem('paymentHistory', JSON.stringify(history));
 
-            showToast(`payment scheduled for ${transaction.date}`, 'success');
-        
-        if (delay <= 0) {
-            processNow(transaction.id);
-        } else {
+            showToast(`Payment scheduled for ${transaction.date}`, 'success');
+            
+            const scheduledDate = new Date(transaction.date);
+            const delay = Math.max(0, scheduledDate - new Date());
             setTimeout(() => processNow(transaction.id), delay);
-        }
         });
 
         function processNow(id) {
@@ -261,28 +258,49 @@
             if (index !== -1 && accounts) {
                 const trans = history[index];
                 const amount = Number(trans.amount);
-                const sender = trans.sender;
-                const recipient = trans.recipient;
-
-                if (accounts[sender] !== undefined && accounts[sender] >= amount) {
-                    const isSuccess = Math.random() > 0.5; 
+                if (accounts[trans.sender] >= amount) {
+                    const isSuccess = Math.random() > 0.2; // 80% success rate
                     trans.status = isSuccess ? 'success' : 'failure';
-
                     if (isSuccess) {
-                        accounts[sender] -= amount;
-                        accounts[recipient] += amount;
+                        accounts[trans.sender] -= amount;
+                        accounts[trans.recipient] += amount;
                         localStorage.setItem('accounts', JSON.stringify(accounts));
                     }
                 } else {
-                    trans.status = 'failure'; 
-                    console.error("Transaction failed: Insufficient funds or invalid account.");
+                    trans.status = 'failure';
                 }
-
                 localStorage.setItem('paymentHistory', JSON.stringify(history));
                 showToast(`Transaction ${trans.status.toUpperCase()}!`, trans.status === 'success' ? 'success' : 'failure');
+                displayBalance(); // Refresh balance UI
             }
         }
 
+        function syncAccounts() {
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+            const sSelect = document.getElementById('sender-name');
+            const rSelect = document.getElementById('recipient-name');
+            Object.keys(accounts).forEach(user => {
+                sSelect.add(new Option(user, user));
+                rSelect.add(new Option(user, user));
+            });
+        }
+
+        function displayBalance() {
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+            const user = document.getElementById('sender-name').value;
+            const div = document.getElementById('live-balance');
+            if(user && accounts[user] !== undefined) {
+                div.style.display = 'block';
+                div.textContent = `Available Balance: KSH ${Number(accounts[user]).toLocaleString()}`;
+            } else {
+                div.style.display = 'none';
+            }
+        }
+
+        window.onload = () => {
+            syncAccounts();
+            document.getElementById('sender-name').addEventListener('change', displayBalance);
+        };
     </script>
 </body>
 </html>

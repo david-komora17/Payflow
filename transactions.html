@@ -3,172 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payflow</title>
+    <title>PayFlow | Transactions</title>
     <link rel="icon" href="/credit-card-regular.png" type="image/x-icon">
-   <style>
+    <style>
         :root {
-            --success : #2ecc71;
-            --failed : #e74c3c;
-            --reversed : #3498db;
+            --success: #2ecc71; 
+            --failed: #e74c3c;
+            --reversed: #3498db;
+            --pending: #f39c12;
             --stripe-gradient: linear-gradient(90deg, #635bff 0%, #a855f7 50%, #ec4899 100%);
+            --dark-blue: #0a2540;
         }
 
         body {
-            background-color: rgba(249, 249, 249, 0.777);
-            background-size : cover;
-            font-family :'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin : 0;
-            display : flex;
-            flex-direction : column;
-            height: 100vh;
-            overflow: hidden; 
-        }
-        svg {
-            background-color: violet;
-            max-width: 30px;
-            max-height: 30px;
-            padding-top: 30px;
-        }
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap : 20px;
-            padding :20px;
-            max-width : 1200px;
-            margin : auto;
-        }   
-
-        nav {
-            background-color: rgba(8, 7, 7, 0.8);
-            width: 100%;
-            padding: 10px 0;
-        }
-
-        nav h1 {
-            text-align: center; 
-            color: white; 
-            margin: 0; 
-            font-size: 1.5rem;
-        }
-
-        nav ul {
-            list-style-type: none;
+            background-color: #f6f9fc;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
-        }
-            
-        nav a {
-            padding: 10px 20px;
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--dark-blue);
         }
 
-       table {
-            width: 750px;
-            border-collapse: collapse;
-            background-color: rgba(128, 0, 128, 0.675);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-
-        }   
-
-        .table-container {
-            max-height: 400px; 
-            overflow-y: auto;  
-            width: fit-content;
-            margin: 20px auto; 
-            border-radius: 15px; 
+        /* --- Navigation --- */
+        nav {
+            background-color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
         }
-        
+        nav h1 {
+            text-align: center; margin: 0; font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        nav ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; justify-content: center; }
+        nav a { padding: 10px 20px; color: #6772e5; text-decoration: none; font-weight: 600; }
+
+        /* --- Stripe Text Header --- */
+        .stripe-text {
+            background: var(--stripe-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-align: center;
+        }
+        .stripe-text svg {
+            /* We use 'currentColor' or just target the path fill */
+            fill: url(#stripe-gradient-id); /* This refers to the ID we will create in the SVG */
+            vertical-align: middle;
+        }
+
+
+        /* --- Table Styling --- */
+        .table-wrapper {
+            max-width: 1100px;
+            width: 95%;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 50px 100px -20px rgba(50,50,93,0.15), 0 30px 60px -30px rgba(0,0,0,0.1);
+            overflow: hidden; /* Clips the table corners to match wrapper */
+        }
+
         table {
-            width: 750px;
+            width: 100%;
             border-collapse: collapse;
-            background-color: rgba(128, 0, 128, 0.675);
-            backdrop-filter: blur(10px);
-        }
-
-        table th, table td {
-            padding: 15px;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        } 
-        
-        button {
-            background-color: var(--reversed);
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: 0.3s;
         }
 
-        button:hover {
+        thead {
+            background: #f6f9fc;
+            border-bottom: 2px solid #e6ebf1;
+        }
+
+        th {
+            padding: 20px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #6772e5;
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e6ebf1;
+            font-size: 14px;
+            color: var(--dark-blue);
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fbff;
+            cursor: default;
+        }
+
+        /* --- Status Pills --- */
+        .status-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* --- Buttons --- */
+        .revert-btn {
+            background: var(--reversed);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .revert-btn:hover {
+            transform: scale(1.05);
             filter: brightness(1.1);
         }
 
         footer {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
+            margin-top: auto;
+            padding: 50px;
             text-align: center;
-            padding: 10px;
-            font-size: 12px;
+            background: white;
+            border-top: 1px solid #e6ebf1;
+            color: #6772e5;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <nav>
         <h1>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M128 128C92.7 128 64 156.7 64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192C576 156.7 547.3 128 512 128L128 128zM320 208C381.9 208 432 258.1 432 320C432 381.9 381.9 432 320 432C258.1 432 208 381.9 208 320C208 258.1 258.1 208 320 208zM128 248L128 200C128 195.6 131.6 192 136 192L184 192C188.4 192 192.1 195.6 191.5 200C187.9 229 164.9 251.9 136 255.5C131.6 256 128 252.4 128 248zM128 392C128 387.6 131.6 383.9 136 384.5C165 388.1 187.9 411.1 191.5 440C192 444.4 188.4 448 184 448L136 448C131.6 448 128 444.4 128 440L128 392zM504 255.5C475 251.9 452.1 228.9 448.5 200C448 195.6 451.6 192 456 192L504 192C508.4 192 512 195.6 512 200L512 248C512 252.4 508.4 256.1 504 255.5zM512 392L512 440C512 444.4 508.4 448 504 448L456 448C451.6 448 447.9 444.4 448.5 440C452.1 411 475.1 388.1 504 384.5C508.4 384 512 387.6 512 392zM304 252C293 252 284 261 284 272C284 281.7 290.9 289.7 300 291.6L300 340L296 340C285 340 276 349 276 360C276 371 285 380 296 380L344 380C355 380 364 371 364 360C364 349 355 340 344 340L340 340L340 272C340 261 331 252 320 252L304 252z"/></svg>           
-            PayFlow
+            <span class="stripe-text">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="30" height="30">
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#635bff" />
+                            <stop offset="50%" style="stop-color:#a855f7" />
+                            <stop offset="100%" style="stop-color:#ec4899" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#logo-gradient)" d="M128 128C92.7 128 64 156.7 64 192L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 192C576 156.7 547.3 128 512 128L128 128zM320 208C381.9 208 432 258.1 432 320C432 381.9 381.9 432 320 432C258.1 432 208 381.9 208 320C208 258.1 258.1 208 320 208zM128 248L128 200C128 195.6 131.6 192 136 192L184 192C188.4 192 192.1 195.6 191.5 200C187.9 229 164.9 251.9 136 255.5C131.6 256 128 252.4 128 248zM128 392C128 387.6 131.6 383.9 136 384.5C165 388.1 187.9 411.1 191.5 440C192 444.4 188.4 448 184 448L136 448C131.6 448 128 444.4 128 440L128 392zM504 255.5C475 251.9 452.1 228.9 448.5 200C448 195.6 451.6 192 456 192L504 192C508.4 192 512 195.6 512 200L512 248C512 252.4 508.4 256.1 504 255.5zM512 392L512 440C512 444.4 508.4 448 504 448L456 448C451.6 448 447.9 444.4 448.5 440C452.1 411 475.1 388.1 504 384.5C508.4 384 512 387.6 512 392zM304 252C293 252 284 261 284 272C284 281.7 290.9 289.7 300 291.6L300 340L296 340C285 340 276 349 276 360C276 371 285 380 296 380L344 380C355 380 364 371 364 360C364 349 355 340 344 340L340 340L340 272C340 261 331 252 320 252L304 252z"/>
+                </svg>      
+                PayFlow
+            </span>
         </h1>
         <ul>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="prac2.html">Home</a></li>
             <li><a href="payments.html">Payments</a></li>
-            <li><a href="transactions.html">Transactions</a></li>
+            <li><a href="prac.html">Transactions</a></li>
         </ul>
     </nav>
-    <h1 style="margin-left: 420px;">
-        Transaction History
-    </h1>
-    <div class="table-container">
-            
+
+    <h1 class="stripe-text" style="font-size: 3rem; margin-top: 50px;">Transaction History</h1>
+    
+    <div class="table-wrapper">
         <table id="history-table">
-        
             <thead>
                 <tr>
-                    <th>Transaction ID</th>
-                    <th>sender</th>
                     <th>Date</th>
+                    <th>Sender</th>
+                    <th>Recipient</th>
                     <th>Amount</th>
                     <th>Status</th>
-                    <th>Sender's balance</th>
+                    <th>Balance</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                
-            </tbody>
+                </tbody>
         </table>
     </div>
-    <footer>
-        &copy; 2024 PayFlow. All rights reserved.
-    </footer>
-  <script>
 
+    <footer>&copy; 2026 PayFlow. Built for Capstone Project.</footer>
+
+  <script>
     function showToast(message, type) {
         const toast = document.createElement('div');
         toast.textContent = message;
         document.body.appendChild(toast);
         const bgColor = type === 'success' ? '#2ecc71' : '#e74c3c';
-        toast.style.cssText = `position:fixed; top:20px; right:20px; padding: 15px 25px; border-radius: 5px; color: white; font-weight: bold; z-index: 1000; background-color: ${bgColor};`;
+        toast.style.cssText = `position:fixed; top:20px; right:20px; padding: 15px 25px; border-radius: 8px; color: white; font-weight: bold; z-index: 1000; background-color: ${bgColor}; box-shadow: 0 4px 12px rgba(0,0,0,0.1);`;
         setTimeout(() => toast.remove(), 3000);
-    }   
+    }
+
     function renderTable() {
         const history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
         const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
@@ -177,53 +202,72 @@
 
         history.forEach(item => {
             const row = document.createElement('tr');
-            const currentBalance = accounts[item.sender] !== undefined ? `KSH ${accounts[item.sender]}` : 'N/A';
             
+            // Fix 1: Formatting for numbers
+            const balanceVal = accounts[item.sender] || 0;
+            const formattedBalance = `KSH ${Number(balanceVal).toLocaleString()}`;
+            const formattedAmount = `KSH ${Number(item.amount).toLocaleString()}`;
+            
+            // Fix 2: Use your .revert-btn class properly
             const actionButton = item.status === 'failure' 
-                ? `<button onclick="revertPayment(${item.id})" style="background: #3498db; color:white; border:none; padding:5px 10px; cursor:pointer;">Revert</button>` 
-                : 'processed!';
+                ? `<button class="revert-btn" onclick="revertPayment(${item.id})">Revert</button>` 
+                : '<span style="color: #a3acb9; font-style: italic;">Processed</span>';
 
             row.innerHTML = `
                 <td>${item.date}</td>
-                <td>${item.sender}</td>
+                <td style="font-weight: 600;">${item.sender}</td>
                 <td>${item.recipient}</td>
-                <td>${item.amount}</td>
-                <td style="color: ${getStatusColor(item.status)}">${item.status.toUpperCase()}</td>
-                <td>${currentBalance}</td>
+                <td style="font-weight: 600;">${formattedAmount}</td>
+                <td>
+                    <span class="status-pill" style="background-color: ${getStatusBg(item.status)}; color: ${getStatusTextColor(item.status)};">
+                         ${item.status.toUpperCase()}
+                    </span>
+                </td>
+                <td>${formattedBalance}</td>
                 <td>${actionButton}</td>
             `;
             tableBody.appendChild(row);
         });
     }
 
-    function getStatusColor(status) {
-        if (status === 'success') return '#2ecc71';
-        if (status === 'failure') return '#e74c3c';
-        if (status === 'reversed') return '#3498db';
-        return '#f39c12'; 
+    // Fix 3: Added the missing helper functions used in your HTML template
+    function getStatusTextColor(status) {
+        if (status === 'success') return '#1a7f37';
+        if (status === 'failure') return '#d73a49';
+        if (status === 'reversed') return '#0969da';
+        return '#9a6700'; 
+    }
+
+    function getStatusBg(status) {
+        if (status === 'success') return '#dafbe1';
+        if (status === 'failure') return '#ffebe9';
+        if (status === 'reversed') return '#ddf4ff';
+        return '#fff8c5'; 
     }
 
     window.revertPayment = function(id) {
-    let history = JSON.parse(localStorage.getItem('paymentHistory'));
-    let accounts = JSON.parse(localStorage.getItem('accounts'));
-    const index = history.findIndex(t => t.id === id);
+        let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+        const index = history.findIndex(t => t.id === id);
 
-    if (index !== -1 && accounts) {
-        const trans = history[index];
-        
-        if (trans.status === 'failure') {
-            trans.status = 'reversed';
+        if (index !== -1) {
+            const trans = history[index];
             
-            localStorage.setItem('paymentHistory', JSON.stringify(history));
-            showToast("Transaction Reverted!", "success");
-            renderTable(); 
+            if (trans.status === 'failure') {
+                // Fix 4: The Actual Refund Logic
+                accounts[trans.sender] = Number(accounts[trans.sender]) + Number(trans.amount);
+                trans.status = 'reversed';
+                
+                localStorage.setItem('paymentHistory', JSON.stringify(history));
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                
+                showToast(`KSH ${trans.amount} refunded to ${trans.sender}`, "success");
+                renderTable(); 
+            }
         }
-    }
-};
-
+    };
 
     window.onload = renderTable;
-
-  </script>  
+</script>
 </body>
 </html>
