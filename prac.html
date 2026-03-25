@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow | Transactions</title>
+    <link rel="icon" href="/credit-card-regular.png" type="image/x-icon">
+    <style>
+        :root {
+            --success: #2ecc71;
+            --failed: #e74c3c;
+            --reversed: #3498db;
+            --pending: #f39c12;
+            --stripe-gradient: linear-gradient(90deg, #635bff 0%, #a855f7 50%, #ec4899 100%);
+            --dark-blue: #0a2540;
+        }
+
+        body {
+            background-color: #f6f9fc; /* Clean Stripe background */
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--dark-blue);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            background-color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        nav h1 {
+            text-align: center; margin: 0; font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        nav ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; justify-content: center; }
+        nav a { padding: 10px 20px; color: #6772e5; text-decoration: none; font-weight: 600; }
+
+        /* --- Stripe Text Header --- */
+        .stripe-text {
+            background: var(--stripe-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        /* --- Table Styling (The Big Improvement) --- */
+        .table-wrapper {
+            max-width: 1100px;
+            width: 95%;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 50px 100px -20px rgba(50,50,93,0.15), 0 30px 60px -30px rgba(0,0,0,0.1);
+            overflow: hidden; /* Clips the table corners to match wrapper */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: #f6f9fc;
+            border-bottom: 2px solid #e6ebf1;
+        }
+
+        th {
+            padding: 20px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #6772e5;
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e6ebf1;
+            font-size: 14px;
+            color: var(--dark-blue);
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fbff;
+            cursor: default;
+        }
+
+        /* --- Status Pills --- */
+        .status-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* --- Buttons --- */
+        .revert-btn {
+            background: var(--reversed);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .revert-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            border-top: 1px solid #e6ebf1;
+            color: #6772e5;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1><span class="stripe-text">PayFlow</span></h1>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="payments.html">Payments</a></li>
+            <li><a href="transactions.html">Transactions</a></li>
+        </ul>
+    </nav>
+
+    <h1 class="stripe-text" style="font-size: 3rem; margin-top: 50px;">Transaction History</h1>
+    
+    <div class="table-wrapper">
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Sender</th>
+                    <th>Recipient</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Balance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <footer>&copy; 2026 PayFlow. Built for Capstone Project.</footer>
+
+    <script>
+        function renderTable() {
+            const history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = ""; 
+
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                const balanceAtTx = item.balanceAtTransaction !== undefined 
+                    ? `KSH ${Number(item.balanceAtTransaction).toLocaleString()}` 
+                    : '—';
+                
+                const statusColor = getStatusColor(item.status);
+                
+                // Action logic
+                const actionContent = item.status === 'failure' 
+                    ? `<button class="revert-btn" onclick="revertPayment(${item.id})">Revert</button>` 
+                    : `<span style="color:#aab7c4">Closed</span>`;
+
+                row.innerHTML = `
+                    <td style="color:#6772e5; font-weight:600">${item.date}</td>
+                    <td><strong>${item.sender}</strong></td>
+                    <td>${item.recipient}</td>
+                    <td><strong>KSH ${Number(item.amount).toLocaleString()}</strong></td>
+                    <td>
+                        <span class="status-pill" style="background:${statusColor}22; color:${statusColor}">
+                            ● ${item.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td style="color:#424770">${balanceAtTx}</td>
+                    <td>${actionContent}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function getStatusColor(status) {
+            if (status === 'success') return '#2ecc71';
+            if (status === 'failure') return '#e74c3c';
+            if (status === 'reversed') return '#3498db';
+            return '#f39c12'; 
+        }
+
+        window.revertPayment = function(id) {
+            let history = JSON.parse(localStorage.getItem('paymentHistory'));
+            const index = history.findIndex(t => t.id === id);
+
+            if (index !== -1) {
+                history[index].status = 'reversed';
+                localStorage.setItem('paymentHistory', JSON.stringify(history));
+                renderTable(); 
+            }
+        };
+
+        window.onload = renderTable;
+    </script>
+</body>
+</html>
