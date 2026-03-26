@@ -16,7 +16,7 @@
 
 ---
 
-### 🛠️ Technical Stack
+###  Technical Stack
 
 * **Frontend:** HTML5, CSS3 (Flexbox/Grid), JavaScript (ES6+)
 * **Data Management:** `localStorage` API for state persistence.
@@ -26,7 +26,7 @@
 
 ---
 
-### 📖 How It Works
+### How It Works
 
 1.  **Authorize:** Select a sender and recipient from the synchronized account list.
 2.  **Schedule:** Input the amount and select a future date for the PayFlow protocol to handle.
