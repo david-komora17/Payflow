@@ -53,8 +53,8 @@
             text-align: center;
         }
         .stripe-text svg {
-            /* We use 'currentColor' or just target the path fill */
-            fill: url(#stripe-gradient-id); /* This refers to the ID we will create in the SVG */
+            /* use 'currentColor' or just target the path fill */
+            fill: url(#stripe-gradient-id); /* This refers to the ID created in the SVG */
             vertical-align: middle;
         }
 
@@ -67,7 +67,7 @@
             background: white;
             border-radius: 16px;
             box-shadow: 0 50px 100px -20px rgba(50,50,93,0.15), 0 30px 60px -30px rgba(0,0,0,0.1);
-            overflow: hidden; /* Clips the table corners to match wrapper */
+
         }
 
         table {
@@ -209,12 +209,12 @@
         history.forEach(item => {
             const row = document.createElement('tr');
             
-            // Fix 1: Formatting for numbers
+            // Formatting for numbers
             const balanceVal = accounts[item.sender] || 0;
             const formattedBalance = `KSH ${Number(balanceVal).toLocaleString()}`;
             const formattedAmount = `KSH ${Number(item.amount).toLocaleString()}`;
             
-            // Fix 2: Use your .revert-btn class properly
+            // Use the .revert-btn class properly
             const actionButton = item.status === 'failure' 
                 ? `<button class="revert-btn" onclick="revertPayment(${item.id})">Revert</button>` 
                 : '<span style="color: #a3acb9; font-style: italic;">Processed</span>';
@@ -236,7 +236,7 @@
         });
     }
 
-    // Fix 3: Added the missing helper functions used in your HTML template
+    // Add the missing helper functions used in the HTML template
     function getStatusTextColor(status) {
         if (status === 'success') return '#1a7f37';
         if (status === 'failure') return '#d73a49';
@@ -252,23 +252,31 @@
     }
 
     window.revertPayment = function(id) {
-        let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
-        let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
-        const index = history.findIndex(t => t.id === id);
+    let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    const index = history.findIndex(t => t.id === id);
 
-        if (index !== -1) {
-            const trans = history[index];
-            
-            if (trans.status === 'failure') {
-                // Fix 4: The Actual Refund Logic
-                accounts[trans.sender] = Number(accounts[trans.sender]) + Number(trans.amount);
-                trans.status = 'reversed';
+    if (index !== -1) {
+        const trans = history[index];
+        
+        // ONLY refund if status is 'failure'. 
+        // 'rejected' or 'success' or 'reversed' are ignored.
+        if (trans.status === 'failure') {
+                const refundAmount = Number(trans.amount);
                 
+                accounts[trans.sender] = Number(accounts[trans.sender]) + refundAmount;
+                
+                trans.status = 'reversed';
+
                 localStorage.setItem('paymentHistory', JSON.stringify(history));
                 localStorage.setItem('accounts', JSON.stringify(accounts));
                 
-                showToast(`KSH ${trans.amount} refunded to ${trans.sender}`, "success");
-                renderTable(); 
+                showToast(`KSH ${refundAmount} restored to ${trans.sender}`, "success");
+                
+                displayBalance();
+                if (typeof renderTable === "function") renderTable(); 
+            } else {
+                showToast("This transaction is not eligible for a refund.", "error");
             }
         }
     };
@@ -277,3 +285,9 @@
 </script>
 </body>
 </html>
+
+
+else if (trans.status === 'failure' || ) {
+                
+               
+            }

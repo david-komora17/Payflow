@@ -256,30 +256,48 @@
             setTimeout(() => processNow(transaction.id), delay);
         });
 
-        function processNow(id) {
-            let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
-            let accounts = JSON.parse(localStorage.getItem('accounts'));
-            const index = history.findIndex(t => t.id === id);
-            
-            if (index !== -1 && accounts) {
-                const trans = history[index];
-                const amount = Number(trans.amount);
-                if (accounts[trans.sender] >= amount) {
-                    const isSuccess = Math.random() > 0.2; // 80% success rate
-                    trans.status = isSuccess ? 'success' : 'failure';
-                    if (isSuccess) {
-                        accounts[trans.sender] -= amount;
-                        accounts[trans.recipient] += amount;
-                        localStorage.setItem('accounts', JSON.stringify(accounts));
-                    }
-                } else {
-                    trans.status = 'failure';
-                }
-                localStorage.setItem('paymentHistory', JSON.stringify(history));
-                showToast(`Transaction ${trans.status.toUpperCase()}!`, trans.status === 'success' ? 'success' : 'failure');
-                displayBalance(); 
+       function processNow(id) {
+    let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+    let accounts = JSON.parse(localStorage.getItem('accounts'));
+    const index = history.findIndex(t => t.id === id);
+    
+    if (index !== -1 && accounts) {
+        const trans = history[index];
+        const amount = Number(trans.amount);
+
+        // Check balance FIRST
+        if (accounts[trans.sender] >= amount) {
+            const isSuccess = Math.random() > 0.2; 
+
+            if (isSuccess) {
+                trans.status = 'success';
+                accounts[trans.sender] -= amount;
+                accounts[trans.recipient] += amount;
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+            } else {
+                // Money is deducted even on "failure" 
+                // to simulate a real-world interrupted transaction.
+                trans.status = 'failure';
+                accounts[trans.sender] -= amount; 
+                localStorage.setItem('accounts', JSON.stringify(accounts));
             }
+        } else {
+            /*rejected transaction*/
+            trans.status = 'rejected'; 
+            showToast("Insufficient Balance: Transaction Rejected", "error");
         }
+
+        localStorage.setItem('paymentHistory', JSON.stringify(history));
+        
+        // Only show toast if it wasn't already rejected above
+        if (trans.status !== 'rejected') {
+            showToast(`Transaction ${trans.status.toUpperCase()}!`, trans.status === 'success' ? 'success' : 'failure');
+        }
+        
+        displayBalance(); 
+        if (typeof renderTable === "function") renderTable(); 
+    }
+}
 
         function syncAccounts() {
             const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
