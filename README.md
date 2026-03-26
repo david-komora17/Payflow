@@ -34,4 +34,3 @@
 
 ---
 
-**Would you like me to draft a "Getting Started" or "Installation" section to go along with this description?**
