@@ -192,42 +192,31 @@
     <footer>&copy; 2026 PayFlow. Built for Capstone Project.</footer>
 
     <script>
-        function showToast(message, color) {
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.cssText = `
-                position:fixed; top:20px; right:20px; padding: 15px 25px;
-                border-radius: 10px; color: white; font-weight: bold; z-index: 1000;
-                background-color: ${color}; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
         document.getElementById('signup-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const username = document.getElementById('new-username').value.trim();
             const deposit = Number(document.getElementById('initial-deposit').value);
+            const pin = document.getElementById('new-pin').value;
 
-            let accounts = JSON.parse(localStorage.getItem('accounts')) || {
-                "Njeri": 5000,
-                "Daniel": 4000
-            };
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
 
-            if (accounts[username]) {
-                showToast("User already exists!", "#e74c3c");
-                return;
-            }
+                if (accounts[username]) {
+                    showToast("Sorry, user already exists!", "#e74c3c");
+                    return;
+                }
 
-            accounts[username] = deposit;
-            localStorage.setItem('accounts', JSON.stringify(accounts));
+                accounts[username] = {
+                    balance:deposit,
+                    pin:pin
+                };
 
-            showToast("Account created successfully!", "#2ecc71");
-
-            setTimeout(() => {
-                window.location.href = "payments.html";
-            }, 1500);
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+                    showToast("Account created successfully!", "#2ecc71");
+                    setTimeout(() => {
+                        window.location.href = "sign_in.html"
+                    }, 1500);
+                    
         });
     </script>
 </body>
