@@ -165,33 +165,29 @@
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="payments.html">Payments</a></li>
-            <li><a href="transactions.html">Transactions</a></li>
+            <li><a href="history.html">history</a></li>
             <li><a href="sign_in.html">sign_in</a></li>
         </ul>
         
     </nav>
 
-    <form class="payment-form" id="signup-form">
-        <h3>Create Account</h3>
+    <form class="payment-form" id="signin-form">
+        <div id="live-balance" style="display: none; padding: 10px; background: #dafbe1; color: #1a7f37; border-radius: 8px; text-align: center; font-weight: 700; margin-bottom: 20px;"></div>
+        <h3>Go To Account</h3>
         
         <div class="form-group">
-            <label for="new-username">Full Name (Account ID)</label>
-            <input type="text" id="new-username" placeholder="e.g. Mwangi J." required>
+            <label for="new-username">Full Name</label>
+            <input type="text" id="login-name" placeholder="e.g. Felix K." required>
         </div>
 
         <div class="form-group">
-            <label for="initial-deposit">Initial Deposit (KSH)</label>
-            <input type="number" id="initial-deposit" placeholder="Min 100" min="100" required>
-        </div>
-
-        <div class="form-group">
-            <label for="new-pin">Set Transaction Pin</label>
+            <label for="new-pin">Transaction Pin</label>
             <input type="password" id="new-pin" maxlength="4" placeholder="4-digit pin" required>
         </div>
 
         <div class="form-group">
             <label for="new-password">Set account password</label>
-            <input type="password" id="new-password" maxlength="4" placeholder="password" required>
+            <input type="password" id="new-pasword" maxlength="4" placeholder="password" required>
         </div>
 
         <button type="submit">Initialize Account</button>
@@ -202,38 +198,36 @@
 
     <footer>&copy; 2026 PayFlow. Built for Capstone Project.</footer>
 
-    <script>
 
-        function showToast(message, color) {
-            alert(message); 
+<script>
+    const nameInput = document.getElementById('login-name');
+    const balanceDiv = document.getElementById('live-balance');
+
+    // Live Peek: Show balance as they type their name
+    nameInput.addEventListener('input', function() {
+        const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+        const name = this.value.trim();
+        
+        if (accounts[name]) {
+            balanceDiv.style.display = 'block';
+            balanceDiv.textContent = `Welcome back! Balance: KSH ${Number(accounts[name].balance).toLocaleString()}`;
+        } else {
+            balanceDiv.style.display = 'none';
         }
-        document.getElementById('signup-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+    });
 
-            const username = document.getElementById('new-username').value.trim();
-            const deposit = Number(document.getElementById('initial-deposit').value);
-            const pin = document.getElementById('new-pin').value;
-            const password = document.getElementById('new-password').value.trim();
-            let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    document.getElementById('signin-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
 
-                if (accounts[username]) {
-                    showToast("Sorry, user already exists!", "#e74c3c");
-                    return;
-                }
-
-                accounts[username] = {
-                    balance:deposit,
-                    pin:pin,
-                    password:password
-                };
-
-                localStorage.setItem('accounts', JSON.stringify(accounts));
-                    showToast("Account created successfully!", "#2ecc71");
-                    setTimeout(() => {
-                        window.location.href = "sign_in.html"
-                    }, 1500);
-
-        });
-    </script>
+        if (accounts[name]) {
+            localStorage.setItem('currentUser', name);
+            window.location.href = "payments.html";
+        } else {
+            alert("Account not found. Please sign up.");
+        }
+    });
+</script>
 </body>
 </html>

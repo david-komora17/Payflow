@@ -71,7 +71,6 @@
             border-radius: 20px;
             width: 100%;
             max-width: 700px;
-            max-width: 700px; 
             box-shadow: 0 50px 100px -20px rgba(50,50,93,0.15), 0 30px 60px -30px rgba(0,0,0,0.1);
             border: 1px solid #e6ebf1;
         }
@@ -174,8 +173,8 @@
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="payments.html">Payments</a></li>
-            <li><a href="transactions.html">Transactions</a></li>
-            <li><a href="sign_up.html">sign_up</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="sign_in.html">sign_in</a></li>
         </ul>
        
     </nav>
@@ -185,20 +184,17 @@
             <div id="live-balance" style="display: none;"></div>
             <h3>Payment Details</h3>
             <div class="form-grid">
+                
                 <div class="form-group">
-                    <label for="name">Project Owner's Name</label>
-                    <input type="text" id="name" placeholder="e.g. David Komora" required>
+                    <label for="sender-name">Sender (You)</label>
+                    <input type="text" id="sender-name" style="background-color: #e6ebf1;">
                 </div>
+
                 <div class="form-group">
                     <label for="mpesa-pin">M-Pesa Pin</label>
                     <input type="password" id="mpesa-pin" placeholder="****" required>
                 </div>
-                <div class="form-group">
-                    <label for="sender-name">Sender</label>
-                    <select id="sender-name" required>
-                        <option value="">Select Sender</option>
-                    </select>
-                </div>
+                
                 <div class="form-group">
                     <label for="recipient-name">Recipient</label>
                     <select id="recipient-name" required>
@@ -238,7 +234,6 @@
             e.preventDefault();
             const transaction = {
                 id: Date.now(),
-                name: document.getElementById('name').value,
                 sender: document.getElementById('sender-name').value,
                 recipient: document.getElementById('recipient-name').value,
                 amount: document.getElementById('amount').value,
@@ -256,74 +251,77 @@
             const delay = Math.max(0, scheduledDate - new Date());
             setTimeout(() => processNow(transaction.id), delay);
         });
+        function displayBalance() {
+    const currentUser = localStorage.getItem('currentUser');
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    const div = document.getElementById('live-balance');
+    
+    // Check accounts[currentUser].balance because of your Sign Up structure
+    if (currentUser && accounts[currentUser]) {
+        div.style.display = 'block';
+        const bal = accounts[currentUser].balance;
+        div.textContent = `Active Session: ${currentUser} | Balance: KSH ${Number(bal).toLocaleString()}`;
+    }
+}
 
-       function processNow(id) {
-        let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
-        let accounts = JSON.parse(localStorage.getItem('accounts'));
-        const index = history.findIndex(t => t.id === id);
-        
-        if (index !== -1 && accounts) {
-            const trans = history[index];
-            const amount = Number(trans.amount);
+function processNow(id) {
+    let history = JSON.parse(localStorage.getItem('paymentHistory')) || [];
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    const index = history.findIndex(t => t.id === id);
+    
+    if (index !== -1) {
+        const trans = history[index];
+        const amt = Number(trans.amount);
 
-            // Check balance FIRST
-            if (accounts[trans.sender] >= amount) {
-                const isSuccess = Math.random() > 0.2; 
-
-                if (isSuccess) {
-                    trans.status = 'success';
-                    accounts[trans.sender] -= amount;
-                    accounts[trans.recipient] += amount;
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
-                } else {
-                    
-                    trans.status = 'failure';
-                    accounts[trans.sender] -= amount; 
-                    localStorage.setItem('accounts', JSON.stringify(accounts));
-                }
-            } else {
-                trans.status = 'rejected'; 
-                showToast("Insufficient Balance: Transaction Rejected", "error");
+        // Accessing the .balance property correctly
+        if (accounts[trans.sender] && accounts[trans.sender].balance >= amt) {
+            trans.status = 'success';
+            accounts[trans.sender].balance -= amt;
+            
+            if(accounts[trans.recipient]) {
+                accounts[trans.recipient].balance += amt;
             }
-
+            
+            localStorage.setItem('accounts', JSON.stringify(accounts));
             localStorage.setItem('paymentHistory', JSON.stringify(history));
-            
-            // Only show toast if it wasn't already rejected above
-            if (trans.status !== 'rejected') {
-                showToast(`Transaction ${trans.status.toUpperCase()}!`, trans.status === 'success' ? 'success' : 'failure');
-            }
-            
-            displayBalance(); 
-            if (typeof renderTable === "function") renderTable(); 
+            showToast("Transaction Successful!", "success");
+        } else {
+            trans.status = 'failed';
+            localStorage.setItem('paymentHistory', JSON.stringify(history));
+            showToast("Insufficient Funds", "failed");
         }
+        displayBalance(); 
+    }
+}
+// 1. Identify the user and populate the recipient list
+function initializeSession() {
+    const currentUser = localStorage.getItem('currentUser');
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
+    
+    // Redirect to login if no one is signed in
+    if (!currentUser) {
+        window.location.href = "sign_in.html";
+        return;
     }
 
-            function syncAccounts() {
-                const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
-                const sSelect = document.getElementById('sender-name');
-                const rSelect = document.getElementById('recipient-name');
-                Object.keys(accounts).forEach(user => {
-                    sSelect.add(new Option(user, user));
-                    rSelect.add(new Option(user, user));
-                });
-            }
+    // Set the Sender field automatically
+    const senderInput = document.getElementById('sender-name');
+    senderInput.value = currentUser;
 
-            function displayBalance() {
-                const accounts = JSON.parse(localStorage.getItem('accounts')) || {};
-                const user = document.getElementById('sender-name').value;
-                const div = document.getElementById('live-balance');
-                if(user && accounts[user] !== undefined) {
-                    div.style.display = 'block';
-                    div.textContent = `Available Balance: KSH ${Number(accounts[user]).toLocaleString()}`;
-                } else {
-                    div.style.display = 'none';
-                }
-            }
+    // Populate RECIPIENTS (everyone EXCEPT the current user)
+    const rSelect = document.getElementById('recipient-name');
+    Object.keys(accounts).forEach(user => {
+        if (user !== currentUser) {
+            const option = new Option(user, user);
+            rSelect.add(option);
+        }
+    });
 
-        window.onload = () => {
-            syncAccounts();
-            document.getElementById('sender-name').addEventListener('change', displayBalance);
-        };
+    displayBalance();
+}
+
+// Run on load
+window.onload = initializeSession;
     </script>
 </body>
 </html>
